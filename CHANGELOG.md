@@ -33,6 +33,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.1.0/).
   similarity già esistenti) e `GET /api/events` (cronologia paginata con keyset pagination su
   `timestamp`), sblocca `companion` US1 e US3. Implementato secondo
   `specs/005-core-search-history/`. 9 nuovi test automatici (29 totali su `core`).
+- `DEPLOY.md`: guida per far girare ingestion+core+graph tutti sul Raspberry Pi 4B (setup,
+  variabili d'ambiente, unit `systemd`). Distingue esplicitamente la whitelist utenti di
+  `ingestion` (filtro di prodotto) dai token Bearer tra servizi `core`/`graph` (segreti veri,
+  da generare random e mai committare) — due controlli diversi, enforcement diverso.
 - Scaffolding Speckit (`.specify/`) e `constitution.md` v1.1.0: privacy-first, modularità,
   API testabili indipendentemente, preferenza servizi esterni su modelli locali pesanti;
   regola su riepilogo di sessione e changelog condiviso.
