@@ -18,6 +18,11 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.1.0/).
   collegamenti per similarità (cosine, numpy) tra eventi salvati, decide se segnalarli in base
   alle preferenze utente (con default se assenti). Implementato secondo
   `specs/002-core-similarity-engine/`. 20 test automatici (unit + contract).
+- Modulo `graph`: API FastAPI (`POST /api/graph/nodes`, `POST /api/graph/edges`,
+  `GET /api/graph/related/{node_id}`) su storage SQLite. Nodi idempotenti su `source_event_id`,
+  relazioni validate (nodi esistenti, no self-loop), esplorazione con BFS in-process fino a una
+  profondità data. Implementato secondo `specs/003-knowledge-graph/`. 18 test automatici (unit +
+  contract).
 - Struttura moduli (`ingestion`, `pipeline`, `core`, `graph`, `companion`) con README stub.
 - `API_CONTRACT.md`: contratto REST tra tutti i moduli (eventi, normalizzazione, grafo,
   progetti/task, preferenze utente).
