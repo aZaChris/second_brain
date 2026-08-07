@@ -12,7 +12,7 @@ Sistema personale di cattura, indicizzazione e ricerca di appunti/eventi, con Ra
 | [`graph`](graph/README.md) | Grafo dei progetti/eventi collegati |
 | [`companion`](companion/README.md) | App di consultazione |
 
-Contratto tra moduli: [`API_CONTRACT.md`](API_CONTRACT.md). Stato del progetto: [`CHANGELOG.md`](CHANGELOG.md). Deploy su Raspberry Pi: [`DEPLOY.md`](DEPLOY.md).
+Contratto tra moduli: [`API_CONTRACT.md`](API_CONTRACT.md). Stato del progetto: [`CHANGELOG.md`](CHANGELOG.md). Deploy su Raspberry Pi: [`DEPLOY.md`](DEPLOY.md). Relazione completa: [`docs/relazione-progetto.md`](docs/relazione-progetto.md).
 
 ## Principi
 
