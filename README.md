@@ -12,7 +12,7 @@ Sistema personale di cattura, indicizzazione e ricerca di appunti/eventi, con Ra
 | [`graph`](graph/README.md) | Grafo dei progetti/eventi collegati |
 | [`companion`](companion/README.md) | App di consultazione |
 
-Contratto tra moduli: [`API_CONTRACT.md`](API_CONTRACT.md).
+Contratto tra moduli: [`API_CONTRACT.md`](API_CONTRACT.md). Stato del progetto: [`CHANGELOG.md`](CHANGELOG.md).
 
 ## Principi
 
