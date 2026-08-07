@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <title>Second Brain — Esplora</title>
+</head>
+<body>
+  <h1>Esplora i collegamenti</h1>
+  <form method="get" action="/explore">
+    <label>Node ID <input type="text" name="node_id" value="{{ node_id or '' }}" required></label>
+    <label>Profondità <input type="number" name="depth" value="{{ depth or 1 }}" min="1"></label>
+    <button type="submit">Esplora</button>
+  </form>
+
+  {% if node_id %}
+    {% include "related_results.html" %}
+  {% endif %}
+</body>
+</html>

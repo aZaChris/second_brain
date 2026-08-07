@@ -1,0 +1,15 @@
+{% if error %}
+  <p class="error">{{ error }}</p>
+{% elif related is not none and related|length == 0 %}
+  <p>Nessun collegamento trovato per <strong>{{ node_id }}</strong>.</p>
+{% elif related %}
+  <h2>Collegamenti di {{ node_id }}</h2>
+  <ul>
+    {% for item in related %}
+      <li>
+        <a href="/explore?node_id={{ item.node_id }}&depth={{ depth or 1 }}">{{ item.node_id }}</a>
+        — {{ item.relation }} (peso {{ item.weight }})
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %}

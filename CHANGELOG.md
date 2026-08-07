@@ -37,6 +37,12 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.1.0/).
   variabili d'ambiente, unit `systemd`). Distingue esplicitamente la whitelist utenti di
   `ingestion` (filtro di prodotto) dai token Bearer tra servizi `core`/`graph` (segreti veri,
   da generare random e mai committare) — due controlli diversi, enforcement diverso.
+- Modulo `companion` (solo US2): web app server-rendered (FastAPI + Jinja2, nessun frontend
+  build) con `GET /explore` per navigare i collegamenti di un nodo su `graph`, esplorazione
+  incrementale via link. Nessuna autenticazione utente in questa v1 (rete privata/locale
+  assunta); `companion → graph` autenticato con `GRAPH_API_TOKEN`. Implementato secondo
+  `specs/004-companion-app/` (scope US2). 9 test automatici (unit + contract). US1 (ricerca) e
+  US3 (cronologia) restano da pianificare/implementare, anche se `core` le supporta già.
 - Scaffolding Speckit (`.specify/`) e `constitution.md` v1.1.0: privacy-first, modularità,
   API testabili indipendentemente, preferenza servizi esterni su modelli locali pesanti;
   regola su riepilogo di sessione e changelog condiviso.
