@@ -9,6 +9,13 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- Modulo `pipeline`: worker in background (nessun server HTTP proprio, come `ingestion`) che
+  interroga `GET /api/events/pending`, scarica il file, trascrive audio o descrive immagini
+  tramite servizi esterni, invia il risultato con `PATCH /api/events/{event_id}`. Su file
+  irraggiungibile o servizio esterno esaurito dopo i retry, invia comunque un `PATCH` con testo
+  segnaposto e `pipeline_meta.status: "failed"` — nessun nuovo endpoint per segnalare un
+  fallimento, l'evento non resta mai bloccato in coda. Implementato secondo
+  `specs/006-pipeline-transcription-captioning/`. 15 test automatici (unit + contract).
 - Modulo `ingestion`: bot Telegram (Python, long polling) con whitelist utenti, normalizzazione
   testo/audio/immagine in evento, invio a `core` con retry a backoff esponenziale, notifica di
   fallimento all'utente, deduplica su `message_id`. Implementato secondo
