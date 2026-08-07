@@ -108,3 +108,46 @@ def test_get_events_page_respects_before_and_limit(tmp_path):
 
     second_page = storage.get_events_page(conn, before=first_page[0]["timestamp"], limit=1)
     assert [e["event_id"] for e in second_page] == ["evt_3"]
+
+
+def test_get_pending_events_excludes_already_normalized_regardless_of_status(tmp_path):
+    db_path = str(tmp_path / "core.db")
+    storage.init_db(db_path)
+    conn = storage.get_conn(db_path)
+    storage.insert_event(conn, make_event("evt_1", type="audio", content=None, media_url="u1"))
+    storage.insert_event(
+        conn,
+        make_event(
+            "evt_2",
+            type="audio",
+            content=None,
+            media_url="u2",
+            normalized_text="già trascritto",
+            status="received",  # embedding fallito dopo il PATCH, ma già trascritto
+        ),
+    )
+
+    pending = storage.get_pending_events(conn, types=["audio", "image"], limit=10)
+    assert [e["event_id"] for e in pending] == ["evt_1"]
+
+
+def test_get_pending_events_orders_fifo(tmp_path):
+    db_path = str(tmp_path / "core.db")
+    storage.init_db(db_path)
+    conn = storage.get_conn(db_path)
+    storage.insert_event(conn, make_event("evt_1", type="audio", content=None, media_url="u1", timestamp="2026-08-03T10:00:00+00:00"))
+    storage.insert_event(conn, make_event("evt_2", type="audio", content=None, media_url="u2", timestamp="2026-08-01T10:00:00+00:00"))
+
+    pending = storage.get_pending_events(conn, types=["audio", "image"], limit=10)
+    assert [e["event_id"] for e in pending] == ["evt_2", "evt_1"]
+
+
+def test_get_pending_events_respects_type_filter(tmp_path):
+    db_path = str(tmp_path / "core.db")
+    storage.init_db(db_path)
+    conn = storage.get_conn(db_path)
+    storage.insert_event(conn, make_event("evt_audio", type="audio", content=None, media_url="u1"))
+    storage.insert_event(conn, make_event("evt_image", type="image", content=None, media_url="u2"))
+
+    pending = storage.get_pending_events(conn, types=["audio"], limit=10)
+    assert [e["event_id"] for e in pending] == ["evt_audio"]

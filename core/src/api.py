@@ -19,6 +19,7 @@ from .logging_setup import configure_logging, log_event
 from .similarity import cosine_similarity, find_similar, is_low_signal
 
 _MEDIA_PREVIEWS = {"audio": "[audio] in attesa di trascrizione", "image": "[immagine] in attesa di trascrizione"}
+_VALID_PENDING_TYPES = {"audio", "image"}
 
 
 def build_preview(event: dict, max_length: int = 140) -> str:
@@ -229,5 +230,22 @@ def create_app(config: Config) -> FastAPI:
             ],
             "next_before": next_before,
         }
+
+    @app.get("/api/events/pending")
+    async def pending_events(
+        type: str | None = None,
+        limit: int = Query(default=20, ge=1, le=100),
+        _: None = Depends(verify_token),
+    ):
+        requested = {t.strip() for t in type.split(",")} if type else set()
+        types = sorted(requested & _VALID_PENDING_TYPES) or sorted(_VALID_PENDING_TYPES)
+
+        conn = storage.get_conn(config.db_path)
+        try:
+            events = storage.get_pending_events(conn, types=types, limit=limit)
+        finally:
+            conn.close()
+
+        return {"events": events}
 
     return app

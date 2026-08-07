@@ -212,6 +212,32 @@ sono altri eventi più vecchi. Nessun evento salvato → `200 OK` con `"events":
 
 ---
 
+## 8. Pipeline → Core: eventi in attesa di elaborazione
+
+**GET /api/events/pending?type={audio,image}&limit={n}**
+
+`type` opzionale (CSV di `audio`/`image`), default entrambi. `limit` opzionale, default `20`,
+massimo `100`. Restituisce solo eventi che non hanno ancora una trascrizione/descrizione (cioè
+non ancora aggiornati via `PATCH /api/events/{event_id}`).
+
+Response `200 OK`:
+```json
+{
+  "events": [
+    {
+      "event_id": "evt_9f2a",
+      "type": "audio | image",
+      "media_url": "url o path del file",
+      "timestamp": "2026-08-07T10:32:00Z"
+    }
+  ]
+}
+```
+
+Nessun evento in attesa → `200 OK` con `"events": []`.
+
+---
+
 ## Convenzioni comuni
 
 Tutti gli errori seguono il formato:

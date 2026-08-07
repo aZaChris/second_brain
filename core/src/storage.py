@@ -123,6 +123,21 @@ def get_events_page(conn: sqlite3.Connection, before: str | None, limit: int) ->
     return [dict(row) for row in rows]
 
 
+def get_pending_events(conn: sqlite3.Connection, types: list[str], limit: int) -> list[dict[str, Any]]:
+    """Eventi audio/immagine non ancora trascritti/descritti (research.md: il segnale è
+    normalized_text IS NULL, non `status`, per non dipendere dall'esito dell'embedding)."""
+    if not types:
+        return []
+    placeholders = ",".join("?" for _ in types)
+    rows = conn.execute(
+        f"SELECT event_id, type, media_url, timestamp FROM events "
+        f"WHERE type IN ({placeholders}) AND normalized_text IS NULL "
+        f"ORDER BY timestamp ASC LIMIT ?",
+        (*types, limit),
+    ).fetchall()
+    return [dict(row) for row in rows]
+
+
 def get_preferences(conn: sqlite3.Connection, user_id: str) -> dict[str, Any]:
     row = conn.execute("SELECT * FROM user_preferences WHERE user_id = ?", (user_id,)).fetchone()
     if row is None:

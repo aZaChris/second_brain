@@ -37,6 +37,14 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.1.0/).
   variabili d'ambiente, unit `systemd`). Distingue esplicitamente la whitelist utenti di
   `ingestion` (filtro di prodotto) dai token Bearer tra servizi `core`/`graph` (segreti veri,
   da generare random e mai committare) — due controlli diversi, enforcement diverso.
+- `API_CONTRACT.md`: aggiunta sezione 8 (`GET /api/events/pending`) per sbloccare la scoperta
+  di eventi audio/immagine da elaborare per `pipeline` — additivo, nessun endpoint esistente
+  modificato. Spec della relativa estensione di `core` in `specs/007-core-pending-events/`.
+- Modulo `core`: aggiunto `GET /api/events/pending` (elenco eventi audio/immagine da
+  trascrivere/descrivere, filtro per tipo, FIFO). L'idea chiave: il filtro si basa su
+  `normalized_text IS NULL`, non sul campo `status` interno, per non far ricomparire eventi già
+  trascritti se l'embedding fallisce dopo il `PATCH`. Sblocca `pipeline` US1/US2. Implementato
+  secondo `specs/007-core-pending-events/`. 8 nuovi test automatici (37 totali su `core`).
 - Modulo `companion` (solo US2): web app server-rendered (FastAPI + Jinja2, nessun frontend
   build) con `GET /explore` per navigare i collegamenti di un nodo su `graph`, esplorazione
   incrementale via link. Nessuna autenticazione utente in questa v1 (rete privata/locale
