@@ -7,7 +7,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Literal
 
-from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException
+from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Query
 from pydantic import BaseModel
 
 from . import storage
@@ -16,7 +16,17 @@ from .config import Config
 from .embedding import EmbeddingError, embed
 from .insight import decide_insight
 from .logging_setup import configure_logging, log_event
-from .similarity import find_similar, is_low_signal
+from .similarity import cosine_similarity, find_similar, is_low_signal
+
+_MEDIA_PREVIEWS = {"audio": "[audio] in attesa di trascrizione", "image": "[immagine] in attesa di trascrizione"}
+
+
+def build_preview(event: dict, max_length: int = 140) -> str:
+    """Anteprima del contenuto per ricerca/cronologia (research.md)."""
+    text = event["content"] or event["normalized_text"]
+    if not text:
+        return _MEDIA_PREVIEWS.get(event["type"], "[contenuto non disponibile]")
+    return text if len(text) <= max_length else text[:max_length] + "..."
 
 
 class EventIn(BaseModel):
@@ -154,5 +164,70 @@ def create_app(config: Config) -> FastAPI:
         finally:
             conn.close()
         return payload.model_dump()
+
+    @app.get("/api/events/search")
+    async def search_events(
+        q: str = "",
+        limit: int = Query(default=10, ge=1, le=50),
+        _: None = Depends(verify_token),
+    ):
+        if not q.strip():
+            return {"results": []}
+
+        query_vector = embed(q, api_url=config.embedding_api_url, api_token=config.embedding_api_token)
+
+        conn = storage.get_conn(config.db_path)
+        try:
+            candidates = storage.get_embedded_events_all(conn)
+        finally:
+            conn.close()
+
+        scored = sorted(
+            (
+                {"event": candidate, "score": cosine_similarity(query_vector, candidate["embedding"])}
+                for candidate in candidates
+            ),
+            key=lambda item: item["score"],
+            reverse=True,
+        )[:limit]
+
+        return {
+            "results": [
+                {
+                    "event_id": item["event"]["event_id"],
+                    "preview": build_preview(item["event"]),
+                    "type": item["event"]["type"],
+                    "timestamp": item["event"]["timestamp"],
+                    "score": item["score"],
+                }
+                for item in scored
+            ]
+        }
+
+    @app.get("/api/events")
+    async def list_events(
+        before: str | None = None,
+        limit: int = Query(default=20, ge=1, le=100),
+        _: None = Depends(verify_token),
+    ):
+        conn = storage.get_conn(config.db_path)
+        try:
+            page = storage.get_events_page(conn, before=before, limit=limit)
+        finally:
+            conn.close()
+
+        next_before = page[-1]["timestamp"] if len(page) == limit else None
+        return {
+            "events": [
+                {
+                    "event_id": event["event_id"],
+                    "preview": build_preview(event),
+                    "type": event["type"],
+                    "timestamp": event["timestamp"],
+                }
+                for event in page
+            ],
+            "next_before": next_before,
+        }
 
     return app

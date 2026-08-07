@@ -69,3 +69,42 @@ def test_upsert_preferences_roundtrip(tmp_path):
     prefs = storage.get_preferences(conn, "tg_1")
     assert prefs["depth_level"] == "approfondito"
     assert prefs["interests"] == ["robotica"]
+
+
+def test_get_embedded_events_all_only_returns_embedded(tmp_path):
+    db_path = str(tmp_path / "core.db")
+    storage.init_db(db_path)
+    conn = storage.get_conn(db_path)
+    storage.insert_event(conn, make_event("evt_1", status="received"))
+    storage.insert_event(conn, make_event("evt_2", status="embedded", embedding="[0.1, 0.2]"))
+    storage.insert_event(conn, make_event("evt_3", status="skipped_low_signal"))
+
+    embedded = storage.get_embedded_events_all(conn)
+    assert [e["event_id"] for e in embedded] == ["evt_2"]
+
+
+def test_get_events_page_orders_by_timestamp_desc(tmp_path):
+    db_path = str(tmp_path / "core.db")
+    storage.init_db(db_path)
+    conn = storage.get_conn(db_path)
+    storage.insert_event(conn, make_event("evt_1", timestamp="2026-08-01T10:00:00+00:00"))
+    storage.insert_event(conn, make_event("evt_2", timestamp="2026-08-03T10:00:00+00:00"))
+    storage.insert_event(conn, make_event("evt_3", timestamp="2026-08-02T10:00:00+00:00"))
+
+    page = storage.get_events_page(conn, before=None, limit=10)
+    assert [e["event_id"] for e in page] == ["evt_2", "evt_3", "evt_1"]
+
+
+def test_get_events_page_respects_before_and_limit(tmp_path):
+    db_path = str(tmp_path / "core.db")
+    storage.init_db(db_path)
+    conn = storage.get_conn(db_path)
+    storage.insert_event(conn, make_event("evt_1", timestamp="2026-08-01T10:00:00+00:00"))
+    storage.insert_event(conn, make_event("evt_2", timestamp="2026-08-03T10:00:00+00:00"))
+    storage.insert_event(conn, make_event("evt_3", timestamp="2026-08-02T10:00:00+00:00"))
+
+    first_page = storage.get_events_page(conn, before=None, limit=1)
+    assert [e["event_id"] for e in first_page] == ["evt_2"]
+
+    second_page = storage.get_events_page(conn, before=first_page[0]["timestamp"], limit=1)
+    assert [e["event_id"] for e in second_page] == ["evt_3"]

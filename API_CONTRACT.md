@@ -158,6 +158,60 @@ Response `200 OK`:
 
 ---
 
+## 6. Companion → Core: ricerca semantica
+
+**GET /api/events/search?q={testo}&limit={n}**
+
+`limit` opzionale, default `10`, massimo `50`.
+
+Response `200 OK`:
+```json
+{
+  "results": [
+    {
+      "event_id": "evt_9f2a",
+      "preview": "anteprima o testo troncato",
+      "type": "text | audio | image",
+      "timestamp": "2026-08-07T10:32:00Z",
+      "score": 0.87
+    }
+  ]
+}
+```
+
+Nessun risultato pertinente → `200 OK` con `"results": []`, non un errore.
+
+---
+
+## 7. Companion → Core: cronologia eventi
+
+**GET /api/events?before={timestamp}&limit={n}**
+
+Elenco degli eventi salvati in ordine cronologico decrescente (più recenti prima). `before`
+opzionale (timestamp ISO 8601, esclusivo) per paginare a ritroso; `limit` opzionale, default
+`20`, massimo `100`.
+
+Response `200 OK`:
+```json
+{
+  "events": [
+    {
+      "event_id": "evt_9f2a",
+      "preview": "anteprima o testo troncato",
+      "type": "text | audio | image",
+      "timestamp": "2026-08-07T10:32:00Z"
+    }
+  ],
+  "next_before": "2026-08-06T09:00:00Z"
+}
+```
+
+`next_before` è il valore da passare come `before` per la pagina successiva; `null` se non ci
+sono altri eventi più vecchi. Nessun evento salvato → `200 OK` con `"events": []`,
+`"next_before": null`.
+
+---
+
 ## Convenzioni comuni
 
 Tutti gli errori seguono il formato:

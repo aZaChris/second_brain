@@ -87,6 +87,42 @@ def get_embedded_events(conn: sqlite3.Connection, exclude_event_id: str) -> list
     return [{"event_id": row["event_id"], "embedding": json.loads(row["embedding"])} for row in rows]
 
 
+def get_embedded_events_all(conn: sqlite3.Connection) -> list[dict[str, Any]]:
+    """Tutti gli eventi con status=embedded (FR-003: base per la ricerca semantica)."""
+    rows = conn.execute(
+        "SELECT event_id, content, normalized_text, type, timestamp, embedding "
+        "FROM events WHERE status = 'embedded'"
+    ).fetchall()
+    return [
+        {
+            "event_id": row["event_id"],
+            "content": row["content"],
+            "normalized_text": row["normalized_text"],
+            "type": row["type"],
+            "timestamp": row["timestamp"],
+            "embedding": json.loads(row["embedding"]),
+        }
+        for row in rows
+    ]
+
+
+def get_events_page(conn: sqlite3.Connection, before: str | None, limit: int) -> list[dict[str, Any]]:
+    """Pagina di cronologia ordinata per timestamp decrescente (keyset pagination, research.md)."""
+    if before is not None:
+        rows = conn.execute(
+            "SELECT event_id, content, normalized_text, type, timestamp FROM events "
+            "WHERE timestamp < ? ORDER BY timestamp DESC LIMIT ?",
+            (before, limit),
+        ).fetchall()
+    else:
+        rows = conn.execute(
+            "SELECT event_id, content, normalized_text, type, timestamp FROM events "
+            "ORDER BY timestamp DESC LIMIT ?",
+            (limit,),
+        ).fetchall()
+    return [dict(row) for row in rows]
+
+
 def get_preferences(conn: sqlite3.Connection, user_id: str) -> dict[str, Any]:
     row = conn.execute("SELECT * FROM user_preferences WHERE user_id = ?", (user_id,)).fetchone()
     if row is None:

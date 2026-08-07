@@ -26,6 +26,13 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.1.0/).
 - Struttura moduli (`ingestion`, `pipeline`, `core`, `graph`, `companion`) con README stub.
 - `API_CONTRACT.md`: contratto REST tra tutti i moduli (eventi, normalizzazione, grafo,
   progetti/task, preferenze utente).
+- `API_CONTRACT.md`: aggiunte sezioni 6-7 (`GET /api/events/search`, `GET /api/events`) per
+  sbloccare ricerca e cronologia di `companion` — nessun endpoint esistente modificato. Spec
+  della relativa estensione di `core` in `specs/005-core-search-history/`.
+- Modulo `core`: aggiunti `GET /api/events/search` (ricerca semantica, riusa embedding/cosine
+  similarity già esistenti) e `GET /api/events` (cronologia paginata con keyset pagination su
+  `timestamp`), sblocca `companion` US1 e US3. Implementato secondo
+  `specs/005-core-search-history/`. 9 nuovi test automatici (29 totali su `core`).
 - Scaffolding Speckit (`.specify/`) e `constitution.md` v1.1.0: privacy-first, modularità,
   API testabili indipendentemente, preferenza servizi esterni su modelli locali pesanti;
   regola su riepilogo di sessione e changelog condiviso.
