@@ -57,6 +57,11 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.1.0/).
   incrementale via link. Implementato secondo `specs/004-companion-app/` (scope US2). 9 test
   automatici (unit + contract). US1 (ricerca) e US3 (cronologia) restano da
   pianificare/implementare, anche se `core` le supporta già.
+- `DEPLOY.md`: aggiunte le variabili d'ambiente e le unit `systemd` di `pipeline` e
+  `companion` (mancavano dalla prima stesura, scritta solo per ingestion+core+graph).
+  Aggiunto un terzo filtro di accesso alla sezione già esistente: l'utente mock di
+  `companion` (`COMPANION_USERNAME`/`PASSWORD`), trattato come segreto vero al pari dei
+  token tra servizi, non come la whitelist di prodotto.
 - Modulo `companion` (US1 + utente mock): aggiunto `GET /search` (ricerca semantica via
   `core`). Aggiunto anche un gate di autenticazione HTTP Basic ("utente mock": una sola coppia
   utente/password da env var, `secrets.compare_digest`, nessun sistema di account) applicato a

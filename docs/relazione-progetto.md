@@ -160,19 +160,17 @@ verificato con un run reale di tutto lo stack insieme (vedi §6).
 
 ## 5. Deploy
 
-Documentato in `DEPLOY.md`: setup per far girare `ingestion` + `core` + `graph` sullo stesso
-Raspberry Pi 4B, con unit `systemd` di esempio. Punto di attenzione esplicito: due filtri di
+Documentato in `DEPLOY.md`: setup per far girare tutti e 5 i moduli sullo stesso Raspberry Pi
+4B, con unit `systemd` di esempio per ciascuno. Punto di attenzione esplicito: tre filtri di
 accesso diversi, con rigore diverso —
 
 - **whitelist utenti** (`AUTHORIZED_USER_IDS` su `ingestion`): filtro di prodotto, non un
   segreto, ma va tenuto corretto;
 - **token Bearer tra servizi** (`CORE_API_TOKEN`, `GRAPH_API_TOKEN`): segreti veri, da generare
-  random (`secrets.token_hex`), mai committare, con enforcement `401` già implementato.
-
-`DEPLOY.md` non è ancora stato aggiornato con le variabili d'ambiente di `pipeline` né di
-`companion` (vedi §6). Per `companion` andrebbe aggiunta la stessa distinzione già fatta per
-whitelist/token: `COMPANION_USERNAME`/`COMPANION_PASSWORD` sono un segreto vero (utente mock),
-da generare e custodire come `CORE_API_TOKEN`, non come la whitelist di `ingestion`.
+  random (`secrets.token_hex`), mai committare, con enforcement `401` già implementato;
+- **utente mock di `companion`** (`COMPANION_USERNAME`/`COMPANION_PASSWORD`): stesso rigore dei
+  token di servizio (segreto vero, random, mai committato), ma usato da un umano nel browser
+  (HTTP Basic) invece che da un altro modulo in automatico.
 
 ## 6. Cosa manca
 
@@ -185,7 +183,6 @@ da generare e custodire come `CORE_API_TOKEN`, non come la whitelist di `ingesti
   con servizi esterni veri (provider di embedding, STT, captioning) — solo test con mock.
   Diversi task nei vari `tasks.md` restano volutamente non spuntati per questo motivo (es. T026
   di `ingestion`, T031/T023 di `core`/`pipeline`).
-- **`DEPLOY.md`** da aggiornare con le variabili d'ambiente di `pipeline` e `companion`.
 - **Provider esterni**: `EMBEDDING_API_URL`, `STT_API_URL`, `CAPTIONING_API_URL` sono oggi
   interfacce generiche (documentate nei rispettivi `research.md`) — vanno scelti i provider
   reali e adattato il parsing della risposta se il formato differisce da quello atteso.
