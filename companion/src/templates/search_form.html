@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <title>Second Brain — Cerca</title>
+</head>
+<body>
+  <h1>Cerca nei tuoi contenuti</h1>
+  <form method="get" action="/search">
+    <label>Cerca <input type="text" name="q" value="{{ q or '' }}" required></label>
+    <button type="submit">Cerca</button>
+  </form>
+
+  {% if q %}
+    {% include "search_results.html" %}
+  {% endif %}
+</body>
+</html>

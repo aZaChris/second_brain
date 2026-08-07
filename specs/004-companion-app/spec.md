@@ -131,13 +131,20 @@ cronologico corretto, con anteprima e tipo.
 
 - `companion` è ad uso del singolo utente autorizzato del Second Brain (lo stesso di
   `ingestion`), non un'app multi-utente.
-- Ricerca semantica e cronologia richiedono endpoint di lettura in `core` che oggi non esistono
-  (`core`, come specificato e implementato in `002-core-similarity-engine`, espone solo
-  scrittura di eventi e lettura/scrittura preferenze). Sarà necessaria una feature dedicata su
-  `core` (o un'estensione di `API_CONTRACT.md`) prima che questa feature possa essere
-  implementata per intero — questa spec descrive il comportamento atteso lato utente,
-  indipendentemente da quando quegli endpoint saranno disponibili.
+- **[Aggiornato 2026-08-07]** Ricerca semantica e cronologia hanno ora l'endpoint di lettura
+  necessario in `core`: `GET /api/events/search` e `GET /api/events`, implementati in
+  `005-core-search-history` (`API_CONTRACT.md` sezioni 6-7). La dipendenza bloccante che
+  esisteva quando questa spec è stata scritta è risolta; nessun'altra estensione di `core` è
+  necessaria per implementare US1 (ricerca).
 - L'esplorazione dei collegamenti si appoggia agli endpoint già esistenti in `graph`
   (`GET /api/graph/related/{node_id}`, già implementato in `003-knowledge-graph`).
 - In questa fase non è richiesta la possibilità di modificare o cancellare contenuti dall'app:
   solo consultazione (ricerca, esplorazione, cronologia).
+- **Nota su FR-006**: l'implementazione di US2 (`003`-derived, vedi
+  `research.md`/`plan.md` di questa feature) ha adottato "nessuna autenticazione utente in v1,
+  app assunta su rete privata/locale" come default ragionevole per non introdurre login/sessioni
+  a uso personale. Questo significa che FR-006 (restringere l'accesso al solo utente
+  autorizzato) **non è oggi pienamente soddisfatto** da `companion` — è un compromesso accettato
+  finché l'app resta sulla rete locale (coerente con `DEPLOY.md`), ma va rivalutato prima di
+  esporre `companion` oltre quella rete, specialmente aggiungendo la ricerca (che rende
+  interrogabile tutto il contenuto personale salvato).

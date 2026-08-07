@@ -52,12 +52,18 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.1.0/).
   `normalized_text IS NULL`, non sul campo `status` interno, per non far ricomparire eventi già
   trascritti se l'embedding fallisce dopo il `PATCH`. Sblocca `pipeline` US1/US2. Implementato
   secondo `specs/007-core-pending-events/`. 8 nuovi test automatici (37 totali su `core`).
-- Modulo `companion` (solo US2): web app server-rendered (FastAPI + Jinja2, nessun frontend
+- Modulo `companion` (US2): web app server-rendered (FastAPI + Jinja2, nessun frontend
   build) con `GET /explore` per navigare i collegamenti di un nodo su `graph`, esplorazione
-  incrementale via link. Nessuna autenticazione utente in questa v1 (rete privata/locale
-  assunta); `companion → graph` autenticato con `GRAPH_API_TOKEN`. Implementato secondo
-  `specs/004-companion-app/` (scope US2). 9 test automatici (unit + contract). US1 (ricerca) e
-  US3 (cronologia) restano da pianificare/implementare, anche se `core` le supporta già.
+  incrementale via link. Implementato secondo `specs/004-companion-app/` (scope US2). 9 test
+  automatici (unit + contract). US1 (ricerca) e US3 (cronologia) restano da
+  pianificare/implementare, anche se `core` le supporta già.
+- Modulo `companion` (US1 + utente mock): aggiunto `GET /search` (ricerca semantica via
+  `core`). Aggiunto anche un gate di autenticazione HTTP Basic ("utente mock": una sola coppia
+  utente/password da env var, `secrets.compare_digest`, nessun sistema di account) applicato a
+  **tutte** le route, incluso `/explore` (retrofit su US2) — colma il gap su FR-006 notato in
+  `spec.md`, resta un compromesso da rivedere se `companion` uscirà dalla rete locale.
+  Implementato secondo `specs/004-companion-app/`. 12 nuovi test (21 totali su `companion`).
+  US3 (cronologia) resta da pianificare/implementare.
 - Scaffolding Speckit (`.specify/`) e `constitution.md` v1.1.0: privacy-first, modularità,
   API testabili indipendentemente, preferenza servizi esterni su modelli locali pesanti;
   regola su riepilogo di sessione e changelog condiviso.

@@ -1,10 +1,9 @@
-# Data Model: App di Consultazione (Companion) — solo US2
+# Data Model: App di Consultazione (Companion) — US2, poi US1 + utente mock
 
-Nessuna tabella propria: `companion` non persiste nulla, è un livello di presentazione sopra
-`GET /api/graph/related/{node_id}` di `graph` (vedi `003-knowledge-graph/data-model.md` per
-l'origine dei dati).
+Nessuna tabella propria: `companion` non persiste nulla, è un livello di presentazione sopra le
+API già esistenti di `graph` e `core`.
 
-## Vista: risultato di esplorazione (non persistita)
+## Vista: risultato di esplorazione (US2, non persistita)
 
 Costruita direttamente dalla risposta di `graph`:
 
@@ -15,3 +14,18 @@ Costruita direttamente dalla risposta di `graph`:
 
 Ogni elemento di `related` viene renderizzato anche come link `?node_id=<quel node_id>` per
 continuare l'esplorazione (research.md).
+
+## Vista: risultati di ricerca (US1, non persistita)
+
+Costruita direttamente dalla risposta di `core` (`API_CONTRACT.md` sezione 6):
+
+| Campo | Origine |
+|---|---|
+| `q` di ricerca | parametro della richiesta (`?q=...`) |
+| `results` | lista `{event_id, preview, type, timestamp, score}` così come restituita da `core` |
+
+## Utente mock (configurazione, non dato applicativo)
+
+Non è un'entità di dominio: `COMPANION_USERNAME`/`COMPANION_PASSWORD` sono configurazione letta
+da env var (vedi `config.py`), non righe in un database. Nessuna sessione persistita —
+`HTTPBasic` richiede le credenziali a ogni richiesta (research.md).

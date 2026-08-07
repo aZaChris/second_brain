@@ -48,7 +48,7 @@ ingestion ──POST/PATCH /api/events──▶ core ──POST /api/graph/{node
 pipeline ──GET /pending, PATCH────────┘                                      │
                                                                                │
 companion ──GET /api/graph/related────────────────────────────────────────────┘
-companion ──GET /api/events/{search,·}────▶ core   (US1/US3 non ancora implementate)
+companion ──GET /api/events/search─────────▶ core   (US1 implementata; US3 cronologia ancora da fare)
 ```
 
 Il contratto completo, con schema di request/response per ogni endpoint, è in
@@ -127,14 +127,21 @@ end-to-end per intero nei test (nessuna dipendenza da servizi esterni).
 
 ### 3.5 `companion` — app di consultazione
 
-**Cosa fa**: web app server-rendered (FastAPI + Jinja2, nessun frontend con build/JS) che
-permette di esplorare i collegamenti di un contenuto nel grafo, con navigazione incrementale
-cliccando sui nodi collegati.
+**Cosa fa**: web app server-rendered (FastAPI + Jinja2, nessun frontend con build/JS) con due
+pagine: `/explore` (collegamenti di un contenuto nel grafo, navigazione incrementale cliccando
+sui nodi collegati) e `/search` (ricerca semantica tra i contenuti salvati, via `core`).
 
-**Stato**: 🟡 **parziale** — solo la user story di esplorazione grafo (US2) è implementata
-(spec `004-companion-app`, scope volutamente limitato), **9 test** verdi. Ricerca (US1) e
-cronologia (US3) hanno già il backend pronto in `core` (`005-core-search-history`) ma non sono
-mai state pianificate/implementate lato `companion`.
+**Autenticazione**: gate HTTP Basic con un "utente mock" — un'unica coppia utente/password da
+variabili d'ambiente (`secrets.compare_digest`, nessun database utenti/sessioni), applicato a
+tutte le route. Aggiunto insieme alla ricerca perché rendere interrogabile tutto il contenuto
+personale senza alcun gate è stato giudicato un rischio da non lasciare aperto, pur restando
+un compromesso esplicito (non sostituisce un'autenticazione vera se `companion` uscirà mai
+dalla rete locale).
+
+**Stato**: 🟡 **parziale** — US2 (esplorazione grafo) e US1 (ricerca) implementate (spec
+`004-companion-app`), **21 test** verdi. Manca ancora **US3 (cronologia)**: il backend è già
+pronto in `core` (`005-core-search-history`, `GET /api/events`) ma non è mai stato
+pianificato/implementato lato `companion`.
 
 ## 4. Stato dei test
 
@@ -144,8 +151,8 @@ mai state pianificate/implementate lato `companion`.
 | pipeline | 15 | ✅ |
 | core | 37 | ✅ |
 | graph | 18 | ✅ |
-| companion | 9 | ✅ |
-| **Totale** | **91** | ✅ |
+| companion | 21 | ✅ |
+| **Totale** | **103** | ✅ |
 
 Tutti i test girano con servizi esterni (Telegram, provider di embedding/STT/captioning) e, per
 `ingestion`/`pipeline`/`core`, con gli altri moduli **mockati** — nessuno di questi è mai stato
@@ -162,17 +169,23 @@ accesso diversi, con rigore diverso —
 - **token Bearer tra servizi** (`CORE_API_TOKEN`, `GRAPH_API_TOKEN`): segreti veri, da generare
   random (`secrets.token_hex`), mai committare, con enforcement `401` già implementato.
 
-`DEPLOY.md` non è ancora stato aggiornato con le variabili d'ambiente di `pipeline` (vedi §6).
+`DEPLOY.md` non è ancora stato aggiornato con le variabili d'ambiente di `pipeline` né di
+`companion` (vedi §6). Per `companion` andrebbe aggiunta la stessa distinzione già fatta per
+whitelist/token: `COMPANION_USERNAME`/`COMPANION_PASSWORD` sono un segreto vero (utente mock),
+da generare e custodire come `CORE_API_TOKEN`, non come la whitelist di `ingestion`.
 
 ## 6. Cosa manca
 
-- **`companion` US1 (ricerca) e US3 (cronologia)**: backend pronto in `core`, mai
+- **`companion` US3 (cronologia)**: backend pronto in `core` (`GET /api/events`), mai
   pianificato/implementato lato `companion`.
+- **Autenticazione vera su `companion`**: l'utente mock (HTTP Basic, coppia fissa) è un
+  compromesso esplicito per non lasciare la ricerca completamente aperta — non è pensato per
+  reggere un'esposizione oltre la rete locale (vedi `spec.md` di `004-companion-app`).
 - **Validazione end-to-end reale**: nessun modulo è mai stato fatto girare insieme agli altri
   con servizi esterni veri (provider di embedding, STT, captioning) — solo test con mock.
   Diversi task nei vari `tasks.md` restano volutamente non spuntati per questo motivo (es. T026
   di `ingestion`, T031/T023 di `core`/`pipeline`).
-- **`DEPLOY.md`** da aggiornare con le variabili d'ambiente di `pipeline`.
+- **`DEPLOY.md`** da aggiornare con le variabili d'ambiente di `pipeline` e `companion`.
 - **Provider esterni**: `EMBEDDING_API_URL`, `STT_API_URL`, `CAPTIONING_API_URL` sono oggi
   interfacce generiche (documentate nei rispettivi `research.md`) — vanno scelti i provider
   reali e adattato il parsing della risposta se il formato differisce da quello atteso.
@@ -183,5 +196,6 @@ accesso diversi, con rigore diverso —
 
 ## 7. Cronologia dello sviluppo
 
-10 commit su `main`, dal setup iniziale del monorepo all'implementazione di tutti e 5 i moduli.
-Dettaglio completo, sempre aggiornato, in `CHANGELOG.md`.
+12 commit su `main`, dal setup iniziale del monorepo all'implementazione di tutti e 5 i moduli
+(inclusa la ricerca e l'utente mock di `companion`). Dettaglio completo, sempre aggiornato, in
+`CHANGELOG.md`.

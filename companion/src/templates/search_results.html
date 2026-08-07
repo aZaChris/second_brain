@@ -1,0 +1,15 @@
+{% if error %}
+  <p class="error">{{ error }}</p>
+{% elif results is not none and results|length == 0 %}
+  <p>Nessun risultato trovato per "<strong>{{ q }}</strong>".</p>
+{% elif results %}
+  <h2>Risultati per "{{ q }}"</h2>
+  <ul>
+    {% for item in results %}
+      <li>
+        <strong>{{ item.preview }}</strong>
+        — {{ item.type }}, {{ item.timestamp }} (punteggio {{ "%.2f"|format(item.score) }})
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %}

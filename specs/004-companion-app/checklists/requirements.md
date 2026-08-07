@@ -33,9 +33,9 @@
 
 - Tutti gli item passano al primo giro: nessuna modifica richiesta prima di
   `/speckit-plan`.
-- **Dipendenza bloccante nota**: ricerca (US1) e cronologia (US3) richiedono endpoint di
-  lettura in `core` che non esistono ancora (`core` oggi espone solo scrittura eventi e
-  preferenze). Prima di `/speckit-plan`/implementazione di questa feature, servirà una feature
-  separata su `core` che aggiunga quegli endpoint, oppure un'estensione concordata di
-  `API_CONTRACT.md`. Solo US2 (esplorazione grafo) è implementabile subito con gli endpoint
-  esistenti.
+- **[2026-08-07] Riesaminata prima di pianificare US1**: la dipendenza bloccante originale
+  (ricerca/cronologia senza endpoint di lettura in `core`) è risolta da `005-core-search-history`
+  (`GET /api/events/search`, `GET /api/events`). Aggiornate le Assumptions in `spec.md` di
+  conseguenza. Aggiunta anche una nota su FR-006: l'assenza di autenticazione utente su
+  `companion` (decisa per US2) resta un compromesso da rivalutare prima di esporre la ricerca
+  oltre la rete locale. US2 (esplorazione grafo) è già implementata; US1 ora pianificabile.
