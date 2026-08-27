@@ -18,7 +18,7 @@ Contratto tra moduli: [`API_CONTRACT.md`](API_CONTRACT.md). Stato del progetto: 
 
 - Privacy-first: nessuno storage non necessario di dati sensibili.
 - Ogni modulo espone un'API chiara, testabile in isolamento.
-- Preferenza per servizi esterni (LLM/STT) rispetto a modelli pesanti locali sul Raspberry Pi.
+- Preferenza per modelli locali leggeri (embedding, STT, captioning) rispetto a servizi esterni, su nodo ZimaBlade.
 
 ## Branching
 

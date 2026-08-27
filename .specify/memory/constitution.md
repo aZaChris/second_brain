@@ -1,15 +1,33 @@
 <!--
 Sync Impact Report
-- Version change: (template) → 1.0.0 → 1.1.0
-- Modified principles: n/a
-- Added sections (1.0.0): Core Principles (I–IV), Vincoli Tecnici, Development Workflow, Governance
-- Added sections (1.1.0): Development Workflow — regola su riepilogo di sessione e CHANGELOG.md condiviso
-- Removed sections: Principle 5 slot (only 4 principles supplied, removed unused slot)
+- Version change: 1.1.0 → 2.0.0
+- Modified principles:
+  - IV. "Servizi Esterni Preferiti a Modelli Locali Pesanti" → "Modelli Locali Preferiti per
+    Compiti CPU-Compatibili, Servizi Esterni per il Resto" (ridefinizione non retrocompatibile:
+    la preferenza di default si inverte, motivata dalla migrazione infrastrutturale da
+    Raspberry Pi a ZimaBlade)
+- Modified sections:
+  - Vincoli Tecnici: rimosso il riferimento a footprint minimo legato al Raspberry Pi e a
+    "tipicamente ingestion"; sostituito con vincoli di CPU/RAM per container su nodo unico
+    ZimaBlade, mantenuto il vincolo "nessuna GPU assunta disponibile" e la gestione di rete
+    non garantita
+- Added sections: n/a
+- Removed sections: n/a
 - Templates requiring updates:
-  - ✅ plan-template.md (Constitution Check section is generic, references constitution file — no change needed)
-  - ✅ spec-template.md (no constitution-specific references found)
-  - ✅ tasks-template.md (no constitution-specific references found)
-- Follow-up TODOs: none
+  - ✅ plan-template.md (Constitution Check section è generica, nessun riferimento hardcoded a
+    Raspberry Pi o al Principio IV — nessuna modifica necessaria)
+  - ✅ spec-template.md (nessun riferimento specifico alla constitution — nessuna modifica
+    necessaria)
+  - ✅ tasks-template.md (nessun riferimento specifico alla constitution — nessuna modifica
+    necessaria)
+  - ⚠ README.md (riga "Preferenza per servizi esterni (LLM/STT) rispetto a modelli pesanti
+    locali sul Raspberry Pi" riflette ancora il Principio IV precedente — da aggiornare in un
+    passo successivo, non incluso in questo comando)
+- Follow-up TODOs:
+  - specs/002-core-similarity-engine e specs/006-pipeline-transcription-captioning hanno
+    research.md/plan.md che documentano la vecchia decisione (servizio esterno di
+    embedding/STT/captioning) coerente con il Principio IV precedente — da rifare secondo il
+    Principio IV attuale (pianificato come passi successivi della migrazione ZimaBlade)
 -->
 
 # Second Brain Constitution
@@ -37,18 +55,27 @@ Ogni modulo espone un'API con schema di request/response esplicito e documentato
 (mock/stub dei moduli a valle o a monte), senza richiedere l'intero sistema in esecuzione.
 Modifiche al contratto richiedono allineamento tra i moduli coinvolti prima del merge.
 
-### IV. Servizi Esterni Preferiti a Modelli Locali Pesanti
-Il Raspberry Pi funge da nodo di ingestion e orchestrazione, non da nodo di calcolo pesante.
-Per LLM, STT (speech-to-text) e captioning si usano servizi esterni (API) invece di modelli
-pesanti eseguiti localmente, salvo vincoli di privacy o costo che rendano necessaria
-un'alternativa locale leggera — in tal caso la scelta va documentata con la motivazione.
+### IV. Modelli Locali Preferiti per Compiti CPU-Compatibili, Servizi Esterni per il Resto
+L'infrastruttura gira su uno ZimaBlade (Intel Celeron quad-core x86, fino a 16GB RAM, storage
+SATA), nodo unico per tutti i moduli, inclusi i carichi di calcolo leggeri — non più un
+Raspberry Pi limitato a ingestion e orchestrazione. Per compiti compatibili con l'esecuzione su
+CPU (embedding, STT, captioning con modelli leggeri) si preferisce un modello locale a un
+servizio esterno: nessun dato personale lascia il nodo (rafforza il Principio I) e il costo
+marginale resta nullo. In concreto: l'embedding usa un modello locale leggero (es.
+sentence-transformers multilingue); STT e captioning usano un modello locale leggero (es.
+faster-whisper, captioning compatto) finché il tempo di elaborazione resta entro il budget
+definito nelle spec di ciascuna feature (dell'ordine di pochi minuti per evento). Un servizio
+esterno resta l'alternativa legittima quando la qualità richiesta supera quanto un modello
+leggero offre, o quando il tempo di elaborazione locale eccede il budget — in tal caso la scelta
+va documentata con la motivazione.
 
 ## Vincoli Tecnici
 
-Il Raspberry Pi ha risorse di CPU/RAM/storage limitate: i moduli che vi girano (tipicamente
-`ingestion`) devono avere footprint minimo e non assumere disponibilità di GPU. Connettività di
-rete non garantita al 100%: ogni chiamata verso servizi esterni o verso altri moduli deve gestire
-timeout, retry con backoff ed errori di rete senza perdere l'evento in ingresso.
+Tutti i moduli girano containerizzati su un unico nodo ZimaBlade, con limiti di CPU/RAM
+assegnati per container: nessun modulo deve assumere disponibilità di GPU. Connettività di rete
+non garantita al 100% verso servizi esterni (quando usati per le eccezioni del Principio IV) o
+verso altri moduli: ogni chiamata deve gestire timeout, retry con backoff ed errori di rete senza
+perdere l'evento in ingresso.
 
 ## Development Workflow
 
@@ -73,4 +100,4 @@ chiarimenti e correzioni non semantiche. Ogni PR deve poter essere valutata risp
 qui definiti; scostamenti vanno giustificati esplicitamente nella sezione "Complexity Tracking"
 del piano di implementazione.
 
-**Version**: 1.1.0 | **Ratified**: 2026-08-07 | **Last Amended**: 2026-08-07
+**Version**: 2.0.0 | **Ratified**: 2026-08-07 | **Last Amended**: 2026-08-25

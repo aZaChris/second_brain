@@ -72,3 +72,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.1.0/).
 - Scaffolding Speckit (`.specify/`) e `constitution.md` v1.1.0: privacy-first, modularità,
   API testabili indipendentemente, preferenza servizi esterni su modelli locali pesanti;
   regola su riepilogo di sessione e changelog condiviso.
+- `constitution.md` v2.0.0: migrazione infrastrutturale da Raspberry Pi a ZimaBlade (Intel
+  Celeron quad-core x86, 16GB RAM, storage SATA). Principio IV ridefinito da "servizi esterni
+  preferiti" a "modelli locali preferiti per compiti CPU-compatibili" (embedding, STT,
+  captioning) — ridefinizione non retrocompatibile (MAJOR bump). Vincoli Tecnici aggiornati:
+  limiti di CPU/RAM per container su nodo unico invece di footprint minimo legato al Pi.
