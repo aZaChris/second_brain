@@ -1,5 +1,12 @@
 # Research: Motore di Similarità e Approfondimento (Core)
 
+> **Aggiornamento (2026-08-25)**: la sezione "Servizio di embedding" sotto riflette la decisione
+> presa quando il nodo era un Raspberry Pi (Principio IV pre-v2.0.0 della constitution: servizi
+> esterni preferiti). Con la migrazione a ZimaBlade, la decisione è stata ripianificata in
+> `specs/009-embedding-locale-core/` (modello locale di default, servizio esterno come fallback
+> configurabile) — quel documento è la fonte aggiornata, questa sezione resta solo come
+> riferimento storico del perché fu scelta l'API esterna quando il vincolo era ancora il Pi.
+
 Nessun `[NEEDS CLARIFICATION]` residuo: le decisioni sotto derivano dai vincoli della
 constitution e dal volume atteso (uso personale).
 

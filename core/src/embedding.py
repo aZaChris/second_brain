@@ -1,21 +1,51 @@
-"""Client verso il servizio esterno di embedding (principio IV della constitution:
-servizi esterni preferiti a modelli locali pesanti).
-
-Interfaccia minima e disaccoppiata dal provider concreto (research.md): ci si aspetta un
-endpoint che accetti {"input": text} e risponda {"embedding": [float, ...]}. Se il provider
-scelto in produzione usa un formato diverso, va adattato solo qui.
+"""Genera l'embedding del testo di un evento: modello locale in-process di default
+(Principio IV della constitution v2.0.0), servizio esterno HTTP come alternativa configurabile
+per il caso in cui la qualità del modello locale risulti insufficiente.
 """
 
 from __future__ import annotations
 
 import httpx
 
+from .config import Config
+
+_local_model = None  # caricato una volta da preload(), mai per singola richiesta (FR-003)
+
 
 class EmbeddingError(RuntimeError):
     pass
 
 
-def embed(text: str, *, api_url: str, api_token: str, client: httpx.Client | None = None) -> list[float]:
+def preload(config: Config) -> None:
+    """Carica il modello locale in memoria una sola volta, se in modalità locale.
+    Va chiamato una sola volta all'avvio del processo (main.py), non da create_app(): così i
+    test che costruiscono l'app direttamente non innescano un caricamento reale del modello."""
+    global _local_model
+    if config.embedding_mode != "local" or _local_model is not None:
+        return
+
+    from sentence_transformers import SentenceTransformer  # import pesante: solo se serve
+
+    _local_model = SentenceTransformer(config.embedding_model_name, cache_folder=config.embedding_model_cache)
+
+
+def embed(text: str, *, config: Config, client: httpx.Client | None = None) -> list[float]:
+    if config.embedding_mode == "local":
+        return _embed_local(text)
+    return _embed_external(
+        text, api_url=config.embedding_api_url, api_token=config.embedding_api_token, client=client
+    )
+
+
+def _embed_local(text: str) -> list[float]:
+    if _local_model is None:
+        raise EmbeddingError("modello locale non caricato: preload(config) non è stato chiamato all'avvio")
+    return _local_model.encode(text).tolist()
+
+
+def _embed_external(
+    text: str, *, api_url: str, api_token: str, client: httpx.Client | None = None
+) -> list[float]:
     own_client = client is None
     http_client = client or httpx.Client(timeout=10.0)
     try:

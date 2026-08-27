@@ -22,6 +22,14 @@ _MEDIA_PREVIEWS = {"audio": "[audio] in attesa di trascrizione", "image": "[imma
 _VALID_PENDING_TYPES = {"audio", "image"}
 
 
+def _filter_compatible_dimension(events: list[dict], reference_vector: list[float]) -> list[dict]:
+    """Esclude gli embedding con dimensionalità diversa da `reference_vector` (es. residui di
+    un provider di embedding precedente) invece di farli arrivare a un confronto incompatibile
+    (FR-006 di 009-embedding-locale-core)."""
+    expected_length = len(reference_vector)
+    return [event for event in events if len(event["embedding"]) == expected_length]
+
+
 def build_preview(event: dict, max_length: int = 140) -> str:
     """Anteprima del contenuto per ricerca/cronologia (research.md)."""
     text = event["content"] or event["normalized_text"]
@@ -69,7 +77,7 @@ def _process_event_text(event_id: str, config: Config, logger) -> None:
             return
 
         try:
-            vector = embed(text, api_url=config.embedding_api_url, api_token=config.embedding_api_token)
+            vector = embed(text, config=config)
         except EmbeddingError as exc:
             log_event(logger, event_id=event_id, esito="errore_embedding", message=str(exc), level=40)
             return
@@ -77,6 +85,7 @@ def _process_event_text(event_id: str, config: Config, logger) -> None:
         storage.update_event(conn, event_id, embedding=json.dumps(vector), status="embedded")
 
         saved_events = storage.get_embedded_events(conn, exclude_event_id=event_id)
+        saved_events = _filter_compatible_dimension(saved_events, vector)
         matches = find_similar(vector, saved_events, threshold=config.similarity_threshold)
 
         preferences = storage.get_preferences(conn, event["user_id"])
@@ -175,13 +184,14 @@ def create_app(config: Config) -> FastAPI:
         if not q.strip():
             return {"results": []}
 
-        query_vector = embed(q, api_url=config.embedding_api_url, api_token=config.embedding_api_token)
+        query_vector = embed(q, config=config)
 
         conn = storage.get_conn(config.db_path)
         try:
             candidates = storage.get_embedded_events_all(conn)
         finally:
             conn.close()
+        candidates = _filter_compatible_dimension(candidates, query_vector)
 
         scored = sorted(
             (

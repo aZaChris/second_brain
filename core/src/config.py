@@ -10,21 +10,42 @@ class MissingConfigError(RuntimeError):
     pass
 
 
+DEFAULT_EMBEDDING_MODEL_NAME = "paraphrase-multilingual-MiniLM-L12-v2"
+
+
 @dataclass(frozen=True)
 class Config:
     db_path: str
-    embedding_api_url: str
-    embedding_api_token: str
     core_api_token: str
+    embedding_mode: str = "local"  # "local" (default, Principio IV) | "external" (fallback)
+    embedding_model_name: str = DEFAULT_EMBEDDING_MODEL_NAME
+    embedding_model_cache: str | None = None
+    embedding_api_url: str | None = None
+    embedding_api_token: str | None = None
     similarity_threshold: float = 0.75
 
     @classmethod
     def from_env(cls) -> "Config":
+        embedding_mode = os.environ.get("EMBEDDING_MODE", "local")
+        embedding_model_name = os.environ.get("EMBEDDING_MODEL_NAME", DEFAULT_EMBEDDING_MODEL_NAME)
+
+        if embedding_mode == "local":
+            embedding_model_cache = _require_env("EMBEDDING_MODEL_CACHE")
+            embedding_api_url = None
+            embedding_api_token = None
+        else:
+            embedding_model_cache = None
+            embedding_api_url = _require_env("EMBEDDING_API_URL")
+            embedding_api_token = _require_env("EMBEDDING_API_TOKEN")
+
         return cls(
             db_path=_require_env("DB_PATH"),
-            embedding_api_url=_require_env("EMBEDDING_API_URL"),
-            embedding_api_token=_require_env("EMBEDDING_API_TOKEN"),
             core_api_token=_require_env("CORE_API_TOKEN"),
+            embedding_mode=embedding_mode,
+            embedding_model_name=embedding_model_name,
+            embedding_model_cache=embedding_model_cache,
+            embedding_api_url=embedding_api_url,
+            embedding_api_token=embedding_api_token,
         )
 
 

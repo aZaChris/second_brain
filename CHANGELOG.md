@@ -90,3 +90,14 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.1.0/).
   tramite `quickstart.md`); validazione end-to-end sui container non ancora eseguita in questa
   sessione — richiede un host Docker reale (non disponibile nell'ambiente di sviluppo usato per
   scrivere questa feature).
+- Modulo `core`: embedding generato con un modello locale in-process
+  (`paraphrase-multilingual-MiniLM-L12-v2`, `sentence-transformers`) invece di un servizio HTTP
+  esterno — nessun testo utente lascia più il nodo per questo calcolo (Principio IV della
+  constitution v2.0.0). Modello caricato una sola volta all'avvio del processo (`preload()` in
+  `main.py`, mai per richiesta), pesi cache su `/models` (volume di `008-docker-deployment`).
+  Servizio esterno mantenuto come fallback configurabile (`EMBEDDING_MODE=external`). Aggiunta
+  gestione di embedding con dimensionalità incompatibile (es. residui di un vecchio provider):
+  esclusi dal confronto invece di causare un errore. Implementato secondo
+  `specs/009-embedding-locale-core/` (ripianificazione di `002-core-similarity-engine` alla luce
+  della migrazione ZimaBlade). Nuovo `core/tests/unit/test_embedding.py` (modello mockato, nessun
+  download di pesi reali nei test).
