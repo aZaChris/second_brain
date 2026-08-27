@@ -101,3 +101,15 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.1.0/).
   `specs/009-embedding-locale-core/` (ripianificazione di `002-core-similarity-engine` alla luce
   della migrazione ZimaBlade). Nuovo `core/tests/unit/test_embedding.py` (modello mockato, nessun
   download di pesi reali nei test).
+- Modulo `pipeline`: trascrizione audio (`faster-whisper`, modello `base` int8) e captioning
+  immagini (`transformers`, BLIP-base) con modelli locali in-process invece di servizi HTTP
+  esterni — nessun file audio/immagine lascia più il nodo per questi calcoli (Principio IV della
+  constitution v2.0.0). Modelli caricati una sola volta all'avvio del worker (`preload()` in
+  `main()`, mai per richiesta), pesi cache su `/models/stt` e `/models/captioning` (sottocartelle
+  del volume di `008-docker-deployment`). Servizi esterni mantenuti come fallback configurabile,
+  indipendente per audio e per immagini (`STT_MODE`/`CAPTIONING_MODE`). Corretto un bug
+  preesistente in `worker.py`: `pipeline_meta.model_used` era hardcoded a
+  `"stt-external"`/`"captioning-external"` a prescindere dalla modalità realmente usata — ora
+  riflette la modalità effettiva. Implementato secondo `specs/010-stt-captioning-locale/`
+  (ripianificazione di `006-pipeline-transcription-captioning`). `test_transcription.py` e
+  `test_captioning.py` riscritti per intero (modelli mockati, nessun download nei test).

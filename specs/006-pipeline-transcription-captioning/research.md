@@ -1,5 +1,13 @@
 # Research: Trascrizione Audio e Captioning Immagini (Pipeline)
 
+> **Aggiornamento (2026-08-25)**: questo documento assumeva servizi esterni di STT/captioning
+> (Principio IV pre-v2.0.0 della constitution, quando il nodo era un Raspberry Pi). Con la
+> migrazione a ZimaBlade, la decisione è stata ripianificata in
+> `specs/010-stt-captioning-locale/` (modelli locali di default — `faster-whisper` per STT,
+> BLIP-base per captioning — servizi esterni come fallback indipendente per ciascuno) — quel
+> documento è la fonte aggiornata. Le decisioni sotto su polling, gestione fallimenti e
+> retry/backoff restano valide invariate: non dipendevano da dove girasse il modello.
+
 Nessun `[NEEDS CLARIFICATION]` residuo.
 
 ## Scoperta del lavoro: polling vs push

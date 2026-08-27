@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import time
 
-from . import core_client
+from . import captioning, core_client, transcription
 from .captioning import CaptioningError, caption
 from .config import Config
 from .media import MediaUnreachableError, download_media
@@ -24,23 +24,11 @@ def process_event(event: dict, config: Config) -> None:
 
     try:
         if event["type"] == "audio":
-            text = transcribe(
-                media_bytes,
-                api_url=config.stt_api_url,
-                api_token=config.stt_api_token,
-                max_retries=config.max_retries,
-                backoff_seconds=config.retry_backoff_seconds,
-            )
-            model_used = "stt-external"
+            text = transcribe(media_bytes, config=config)
+            model_used = f"stt-{config.stt_mode}"
         else:
-            text = caption(
-                media_bytes,
-                api_url=config.captioning_api_url,
-                api_token=config.captioning_api_token,
-                max_retries=config.max_retries,
-                backoff_seconds=config.retry_backoff_seconds,
-            )
-            model_used = "captioning-external"
+            text = caption(media_bytes, config=config)
+            model_used = f"captioning-{config.captioning_mode}"
     except (TranscriptionError, CaptioningError) as exc:
         _patch_failure(event_id, config, reason="service_unavailable", detail=str(exc))
         return
@@ -84,6 +72,8 @@ def run_once(config: Config) -> int:
 
 def main() -> None:
     config = Config.from_env()
+    transcription.preload(config)  # una sola volta all'avvio, non per richiesta (FR-004)
+    captioning.preload(config)
     while True:
         run_once(config)
         time.sleep(config.poll_interval_seconds)

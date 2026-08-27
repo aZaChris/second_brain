@@ -6,11 +6,17 @@ from src.worker import process_event
 
 
 def make_config() -> Config:
+    # stt_mode/captioning_mode="external" esplicito: questo file testa il percorso esterno
+    # (model_used="stt-external"/"captioning-external" nelle asserzioni sotto), non quello
+    # locale — con "local" come default di Config, va impostato qui esplicitamente
+    # (010-stt-captioning-locale).
     return Config(
         core_api_url="http://core",
         core_api_token="t",
+        stt_mode="external",
         stt_api_url="http://stt",
         stt_api_token="t",
+        captioning_mode="external",
         captioning_api_url="http://cap",
         captioning_api_token="t",
         max_retries=1,
