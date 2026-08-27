@@ -1,0 +1,16 @@
+services:
+  graph:
+    build: .
+    container_name: second-brain-graph
+    env_file: .env
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    volumes:
+      - /srv/second-brain/data/graph:/data
+    networks:
+      - second-brain-net
+
+networks:
+  second-brain-net:
+    external: true

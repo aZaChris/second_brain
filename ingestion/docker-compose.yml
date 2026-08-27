@@ -1,0 +1,12 @@
+services:
+  ingestion:
+    build: .
+    container_name: second-brain-ingestion
+    env_file: .env
+    restart: unless-stopped
+    networks:
+      - second-brain-net
+
+networks:
+  second-brain-net:
+    external: true

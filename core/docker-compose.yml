@@ -1,0 +1,17 @@
+services:
+  core:
+    build: .
+    container_name: second-brain-core
+    env_file: .env
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - /srv/second-brain/data/core:/data
+      - /srv/second-brain/models-cache/core:/models
+    networks:
+      - second-brain-net
+
+networks:
+  second-brain-net:
+    external: true

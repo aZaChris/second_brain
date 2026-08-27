@@ -1,0 +1,14 @@
+services:
+  companion:
+    build: .
+    container_name: second-brain-companion
+    env_file: .env
+    restart: unless-stopped
+    ports:
+      - "8002:8002"
+    networks:
+      - second-brain-net
+
+networks:
+  second-brain-net:
+    external: true

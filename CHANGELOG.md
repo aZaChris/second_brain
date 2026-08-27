@@ -77,3 +77,16 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.1.0/).
   preferiti" a "modelli locali preferiti per compiti CPU-compatibili" (embedding, STT,
   captioning) — ridefinizione non retrocompatibile (MAJOR bump). Vincoli Tecnici aggiornati:
   limiti di CPU/RAM per container su nodo unico invece di footprint minimo legato al Pi.
+- Infrastruttura di deploy containerizzata (`008-docker-deployment`): un `Dockerfile` +
+  `docker-compose.yml` indipendente per ciascun modulo (`ingestion`, `pipeline`, `core`,
+  `graph`, `companion`), a sostituzione delle unit `systemd` su Raspberry Pi. Rete Docker
+  condivisa esterna ai singoli compose (i moduli si raggiungono per nome servizio, non più
+  `localhost:porta`), volumi bind-mount su storage SATA per i database e la cache dei pesi dei
+  modelli locali, restart policy per ruolo (`unless-stopped` per API/bot, `on-failure` per il
+  worker `pipeline`), limiti `cpus`/`mem_limit` sul container `pipeline` per non affamare gli
+  altri moduli sulle 4 CPU condivise (preferite a `deploy.resources.limits`, non affidabile
+  fuori da swarm). `DEPLOY.md` riscritto di conseguenza. Implementato secondo
+  `specs/008-docker-deployment/`. Nessun test automatico (feature di infrastruttura, validata
+  tramite `quickstart.md`); validazione end-to-end sui container non ancora eseguita in questa
+  sessione — richiede un host Docker reale (non disponibile nell'ambiente di sviluppo usato per
+  scrivere questa feature).
