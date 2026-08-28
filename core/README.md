@@ -11,7 +11,7 @@ Design e task: [`../specs/002-core-similarity-engine/`](../specs/002-core-simila
 ```bash
 cd core
 python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 
 export DB_PATH="./core.db"
 export EMBEDDING_API_URL="<endpoint del servizio esterno di embedding>"
@@ -20,6 +20,11 @@ export CORE_API_TOKEN="<token condiviso, vedi API_CONTRACT.md>"
 
 uvicorn src.main:app --host 0.0.0.0 --port 8000
 ```
+
+> In alternativa a `venv`+`pip`: `uv venv` + `uv pip install -r requirements-dev.txt`
+> ([astral.sh/uv](https://astral.sh/uv)) — stessi file di requirements, ma condivide su disco i
+> pacchetti identici tra le venv dei diversi moduli (es. `torch` tra `core` e `pipeline`) invece di
+> duplicarli.
 
 ## Test
 

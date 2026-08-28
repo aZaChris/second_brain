@@ -10,7 +10,7 @@ Design e task: [`../specs/001-ingestion-bot/`](../specs/001-ingestion-bot/).
 ```bash
 cd ingestion
 python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 
 export BOT_TOKEN="<token da BotFather>"
 export AUTHORIZED_USER_IDS="123456789"
@@ -19,6 +19,11 @@ export CORE_API_TOKEN="<token condiviso, vedi API_CONTRACT.md>"
 
 python -m src.bot
 ```
+
+> In alternativa a `venv`+`pip`: `uv venv` + `uv pip install -r requirements-dev.txt`
+> ([astral.sh/uv](https://astral.sh/uv)) — stessi file di requirements, ma condivide su disco i
+> pacchetti identici tra le venv dei diversi moduli (es. `torch` tra `core` e `pipeline`) invece di
+> duplicarli.
 
 ## Test
 

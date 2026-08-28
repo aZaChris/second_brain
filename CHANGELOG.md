@@ -121,3 +121,11 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.1.0/).
   raggiungibilità per nome servizio senza il passo manuale. `DEPLOY.md` e
   `specs/008-docker-deployment/quickstart.md` aggiornati di conseguenza; revisione documentata in
   `specs/008-docker-deployment/research.md`.
+- Dipendenze Python: separato `pytest`/`pytest-asyncio` dai `requirements.txt` di tutti e 5 i
+  moduli in un `requirements-dev.txt` per modulo (`-r requirements.txt` + pacchetti di test) — i
+  `Dockerfile`, che installano solo `requirements.txt`, non spediscono più il framework di test
+  nell'immagine di produzione. README di ciascun modulo aggiornati (`pip install -r
+  requirements-dev.txt` per lo sviluppo locale) con una nota su `uv` come alternativa a
+  `venv`+`pip`: stessi file di requirements, ma condivide su disco (hardlink da cache globale) i
+  pacchetti identici tra le venv di moduli diversi — verificato che dimezza lo spazio reale
+  occupato da `core`+`pipeline` (che condividono `torch` CPU-only).

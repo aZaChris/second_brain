@@ -13,7 +13,7 @@ Design e task: [`../specs/004-companion-app/`](../specs/004-companion-app/).
 ```bash
 cd companion
 python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 
 export GRAPH_API_URL="http://localhost:8001"
 export GRAPH_API_TOKEN="<stesso token configurato su graph, vedi ../DEPLOY.md>"
@@ -24,6 +24,11 @@ export COMPANION_PASSWORD="<scegli una password, segreto vero>"
 
 uvicorn src.main:app --host 0.0.0.0 --port 8002
 ```
+
+> In alternativa a `venv`+`pip`: `uv venv` + `uv pip install -r requirements-dev.txt`
+> ([astral.sh/uv](https://astral.sh/uv)) — stessi file di requirements, ma condivide su disco i
+> pacchetti identici tra le venv dei diversi moduli (es. `torch` tra `core` e `pipeline`) invece di
+> duplicarli.
 
 Poi apri `http://localhost:8002/explore` o `http://localhost:8002/search` nel browser — verrà
 richiesta l'autenticazione con le credenziali configurate sopra.

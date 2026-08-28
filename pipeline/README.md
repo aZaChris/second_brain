@@ -12,7 +12,7 @@ Design e task: [`../specs/006-pipeline-transcription-captioning/`](../specs/006-
 ```bash
 cd pipeline
 python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 
 export CORE_API_URL="http://localhost:8000"
 export CORE_API_TOKEN="<stesso token configurato su core, vedi ../DEPLOY.md>"
@@ -24,6 +24,11 @@ export POLL_INTERVAL_SECONDS=30
 
 python -m src.worker
 ```
+
+> In alternativa a `venv`+`pip`: `uv venv` + `uv pip install -r requirements-dev.txt`
+> ([astral.sh/uv](https://astral.sh/uv)) — stessi file di requirements, ma condivide su disco i
+> pacchetti identici tra le venv dei diversi moduli (es. `torch` tra `core` e `pipeline`) invece di
+> duplicarli.
 
 ## Test
 
