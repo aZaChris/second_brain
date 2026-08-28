@@ -14,20 +14,30 @@ imporrebbe un unico ciclo di vita a tutti e cinque i moduli, regressione rispett
 `systemd` indipendenti di oggi.
 
 **Alternatives considered**: un `docker-compose.yml` unico alla radice con tutti e cinque i
-servizi — scartato: più semplice da avviare con un comando solo, ma perde l'indipendenza di
-ciclo di vita che la spec richiede esplicitamente (US1).
+servizi — scartato inizialmente sull'assunto che perdesse l'indipendenza di ciclo di vita richiesta
+da US1.
 
-## Comunicazione tra moduli: rete condivisa esterna
+**Revisione post-implementazione**: assunto errato — `docker compose <cmd> <servizio>` (es. `up -d
+--build core`, `stop core`, `logs -f core`) opera su un singolo servizio anche dentro un file
+multi-servizio, quindi l'indipendenza di ciclo di vita (US1, FR-001, FR-007) non richiedeva file
+separati. Su un deploy a nodo singolo/operatore singolo (ZimaBlade), il costo dei 5 file (rete
+esterna da creare a mano, nessun `up` unico, chiavi ripetute 5 volte) non aveva contropartita.
+Consolidato in un unico `docker-compose.yml` di root con 5 servizi; Dockerfile per modulo
+invariati. Rete esterna sostituita dalla rete di default del progetto Compose (stesso risultato,
+raggiungibilità per nome servizio, senza passo manuale). Vedi `DEPLOY.md` e
+`quickstart.md` aggiornati di conseguenza.
 
-**Decision**: una rete Docker bridge creata una sola volta fuori da ogni compose (`docker network
-create second-brain-net`), referenziata in ciascun `docker-compose.yml` come rete esterna
-(`external: true`). I moduli si raggiungono per nome di servizio (es. `http://core:8000`) invece
-che con `localhost:porta`.
+## Comunicazione tra moduli: rete condivisa
 
-**Rationale**: con compose separati, la rete di default creata automaticamente da `docker compose
-up` sarebbe una per ciascun modulo, isolata dalle altre — i container non si vedrebbero tra loro.
-Una rete esterna condivisa è l'unico modo per mantenere sia l'indipendenza dei compose (FR-001) sia
-la raggiungibilità reciproca (FR-002).
+**Decision originale (compose separati)**: una rete Docker bridge creata una sola volta fuori da
+ogni compose (`docker network create second-brain-net`), referenziata in ciascun
+`docker-compose.yml` come rete esterna (`external: true`) — necessaria perché con compose separati
+la rete di default di ciascuno sarebbe isolata dalle altre.
+
+**Stato attuale (dopo il consolidamento in un compose di root, vedi sopra)**: la rete di default
+del progetto Compose è già condivisa da tutti e 5 i servizi dichiarati nello stesso file — nessuna
+rete esterna da creare a mano. I moduli si raggiungono comunque per nome di servizio (es.
+`http://core:8000`) invece che con `localhost:porta` (FR-002 invariato).
 
 **Alternatives considered**: pubblicare le porte di ogni container sull'host e comunicare via
 `localhost` come oggi — scartato, reintroduce l'accoppiamento a porte fisse sull'host che Docker

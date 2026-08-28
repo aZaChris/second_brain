@@ -1,0 +1,49 @@
+services:
+  core:
+    build: ./core
+    container_name: second-brain-core
+    env_file: ./core/.env
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - /srv/second-brain/data/core:/data
+      - /srv/second-brain/models-cache/core:/models
+
+  graph:
+    build: ./graph
+    container_name: second-brain-graph
+    env_file: ./graph/.env
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    volumes:
+      - /srv/second-brain/data/graph:/data
+
+  ingestion:
+    build: ./ingestion
+    container_name: second-brain-ingestion
+    env_file: ./ingestion/.env
+    restart: unless-stopped
+
+  pipeline:
+    build: ./pipeline
+    container_name: second-brain-pipeline
+    env_file: ./pipeline/.env
+    restart: on-failure
+    # cpus/mem_limit invece di deploy.resources.limits: quest'ultimo è affidabile solo in
+    # modalità swarm, qui serve un limite applicato anche con `docker compose up` standalone
+    # (research.md). Valori di partenza per un host a 4 CPU/16GB condiviso con altri 4 servizi:
+    # tarare in base al carico reale una volta scelti i modelli locali di STT/captioning.
+    cpus: "2.0"
+    mem_limit: "4g"
+    volumes:
+      - /srv/second-brain/models-cache/pipeline:/models
+
+  companion:
+    build: ./companion
+    container_name: second-brain-companion
+    env_file: ./companion/.env
+    restart: unless-stopped
+    ports:
+      - "8002:8002"

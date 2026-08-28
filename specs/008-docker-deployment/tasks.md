@@ -44,8 +44,9 @@ ogni singolo compose.
   `/srv/second-brain/data/core`, `/srv/second-brain/data/graph`,
   `/srv/second-brain/models-cache/core`, `/srv/second-brain/models-cache/pipeline`
   (data-model.md)
-- [ ] T002 [P] Creare la rete Docker condivisa `second-brain-net`
-  (`docker network create second-brain-net`, research.md)
+- [X] ~~T002 [P] Creare la rete Docker condivisa `second-brain-net`~~ — obsoleto: dopo il
+  consolidamento in un `docker-compose.yml` di root (research.md), la rete di default del progetto
+  Compose copre lo stesso bisogno, nessun passo manuale richiesto
 
 **Checkpoint**: Rete e directory pronte — i moduli possono ora essere containerizzati.
 

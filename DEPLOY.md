@@ -1,10 +1,10 @@
 # Deploy su ZimaBlade (Intel Celeron quad-core x86, 16GB RAM, storage SATA)
 
-Ogni modulo (`ingestion`, `pipeline`, `core`, `graph`, `companion`) gira nel proprio container
-Docker, con il proprio `Dockerfile` e il proprio `docker-compose.yml` indipendente dentro la
-cartella del modulo — nessun compose unico: ogni modulo si costruisce, avvia, ferma e aggiorna
-senza toccare gli altri (`specs/008-docker-deployment/`). I moduli comunicano tra loro per nome di
-servizio su una rete Docker condivisa, non più via `localhost:porta`.
+Ogni modulo (`ingestion`, `pipeline`, `core`, `graph`, `companion`) ha il proprio `Dockerfile`
+nella cartella del modulo, ma un unico `docker-compose.yml` in root definisce i 5 servizi
+(`specs/008-docker-deployment/`) — `docker compose <cmd> <servizio>` costruisce/avvia/ferma/aggiorna
+un modulo senza toccare gli altri, senza bisogno di 5 file separati. I moduli comunicano tra loro
+per nome di servizio sulla rete di default del progetto Compose, non più via `localhost:porta`.
 
 ## Tre filtri di accesso diversi, da trattare diversamente
 
@@ -47,19 +47,10 @@ mkdir -p /srv/second-brain/data/core /srv/second-brain/data/graph \
          /srv/second-brain/models-cache/core /srv/second-brain/models-cache/pipeline
 ```
 
-## 3. Rete Docker condivisa
+## 3. Variabili d'ambiente
 
-Creata una sola volta, fuori da ogni compose — è così che i moduli si raggiungono per nome
-servizio invece che con `localhost:porta`:
-
-```bash
-docker network create second-brain-net
-```
-
-## 4. Variabili d'ambiente
-
-Un file `.env` per modulo, dentro la cartella del modulo (letto da `env_file:` nel suo
-`docker-compose.yml`), mai in git — `.gitignore` esclude già `.env`.
+Un file `.env` per modulo, dentro la cartella del modulo (letto da `env_file:` nel
+`docker-compose.yml` di root), mai in git — `.gitignore` esclude già `.env`.
 
 **`core/.env`**
 ```bash
@@ -114,60 +105,56 @@ COMPANION_PASSWORD=<generato sopra, segreto vero — è l'utente mock per il bro
 > `CAPTIONING_API_URL`/`CAPTIONING_API_TOKEN`, in `pipeline/.env` (FR-006 di
 > `010-stt-captioning-locale`).
 
-## 5. Build e avvio, un modulo alla volta
+## 4. Build e avvio
 
-Nessun ordine bloccante: `ingestion` e `pipeline` hanno già retry con backoff se `core` non è
-ancora su.
+Dalla root del repo. Nessun ordine bloccante: `ingestion` e `pipeline` hanno già retry con
+backoff se `core` non è ancora su.
 
 ```bash
-cd core      && docker compose up -d --build
-cd ../graph  && docker compose up -d --build
-cd ../ingestion && docker compose up -d --build
-cd ../pipeline  && docker compose up -d --build
-cd ../companion && docker compose up -d --build
+docker compose up -d --build
 ```
 
-## 6. Operazioni comuni
+## 5. Operazioni comuni
 
 Aggiornare un singolo modulo (gli altri restano `Up`, invariati):
 
 ```bash
-cd core && docker compose up -d --build
+docker compose up -d --build core
 ```
 
 Fermare un singolo modulo:
 
 ```bash
-cd core && docker compose stop
+docker compose stop core
 ```
 
 Log di un modulo:
 
 ```bash
-cd core && docker compose logs -f
+docker compose logs -f core
 ```
 
 Stato di tutti i moduli:
 
 ```bash
-docker ps --filter "name=second-brain-" --format "table {{.Names}}\t{{.Status}}"
+docker compose ps
 ```
 
-## 7. Ripartenza automatica
+## 6. Ripartenza automatica
 
 `restart: unless-stopped` (API sempre attive e bot `ingestion`) e `restart: on-failure`
-(worker `pipeline`) sono già nei rispettivi `docker-compose.yml` — dopo un riavvio del nodo o del
+(worker `pipeline`) sono già nel `docker-compose.yml` di root — dopo un riavvio del nodo o del
 servizio Docker, tutti i moduli ripartono da soli senza intervento manuale, a meno che tu li abbia
 fermati esplicitamente con `docker compose stop`.
 
-## 8. Limiti di risorse
+## 7. Limiti di risorse
 
 `pipeline` (unico carico CPU-bound pesante, inferenza dei modelli locali di STT/captioning) ha
-`cpus`/`mem_limit` nel proprio `docker-compose.yml`, così un'elaborazione intensiva non riduce le
+`cpus`/`mem_limit` nel `docker-compose.yml` di root, così un'elaborazione intensiva non riduce le
 risorse disponibili a `core`/`graph`/`companion` sulle 4 CPU condivise del nodo. Valori di
 partenza, da tarare con il carico reale (vedi commento nel file).
 
-## 9. Validazione end-to-end
+## 8. Validazione end-to-end
 
 Guida passo-passo con i comandi esatti per verificare rete, persistenza dati, limiti di risorse e
 ripartenza automatica: `specs/008-docker-deployment/quickstart.md`.

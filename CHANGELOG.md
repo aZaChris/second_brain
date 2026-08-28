@@ -113,3 +113,11 @@ Formato: [Keep a Changelog](https://keepachangelog.com/it/1.1.0/).
   riflette la modalità effettiva. Implementato secondo `specs/010-stt-captioning-locale/`
   (ripianificazione di `006-pipeline-transcription-captioning`). `test_transcription.py` e
   `test_captioning.py` riscritti per intero (modelli mockati, nessun download nei test).
+- Infrastruttura di deploy: consolidati i 5 `docker-compose.yml` per modulo
+  (`008-docker-deployment`) in un unico `docker-compose.yml` di root con 5 servizi. L'indipendenza
+  di ciclo di vita per modulo (US1) non richiedeva file separati — `docker compose <cmd>
+  <servizio>` opera già su un singolo servizio dentro un file multi-servizio. Rete Docker esterna
+  (`second-brain-net`, creata a mano) sostituita dalla rete di default del progetto Compose, stessa
+  raggiungibilità per nome servizio senza il passo manuale. `DEPLOY.md` e
+  `specs/008-docker-deployment/quickstart.md` aggiornati di conseguenza; revisione documentata in
+  `specs/008-docker-deployment/research.md`.
