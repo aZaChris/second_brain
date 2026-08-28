@@ -1,18 +1,21 @@
 # Second Brain
 
-Sistema personale di cattura, indicizzazione e ricerca di appunti/eventi, con Raspberry Pi come nodo di ingestion.
+Sistema personale di cattura, indicizzazione e ricerca di appunti/eventi, containerizzato su un
+nodo ZimaBlade (Intel Celeron quad-core x86, 16GB RAM).
 
 ## Moduli
 
 | Modulo | Responsabilità |
 |---|---|
-| [`ingestion`](ingestion/README.md) | Bot Telegram/WhatsApp: riceve messaggi e li normalizza in eventi |
-| [`pipeline`](pipeline/README.md) | Trascrizione audio, captioning immagini |
-| [`core`](core/README.md) | Embedding, ricerca per similarità, motore decisionale |
+| [`ingestion`](ingestion/README.md) | Bot Telegram: riceve messaggi e li normalizza in eventi |
+| [`pipeline`](pipeline/README.md) | Trascrizione audio e captioning immagini (modelli locali) |
+| [`core`](core/README.md) | Embedding (locale), ricerca per similarità, motore decisionale |
 | [`graph`](graph/README.md) | Grafo dei progetti/eventi collegati |
-| [`companion`](companion/README.md) | App di consultazione |
+| [`companion`](companion/README.md) | App di consultazione (ricerca, esplorazione grafo) |
 
-Contratto tra moduli: [`API_CONTRACT.md`](API_CONTRACT.md). Stato del progetto: [`CHANGELOG.md`](CHANGELOG.md). Deploy su Raspberry Pi: [`DEPLOY.md`](DEPLOY.md). Relazione completa: [`docs/relazione-progetto.md`](docs/relazione-progetto.md).
+Contratto tra moduli: [`API_CONTRACT.md`](API_CONTRACT.md). Stato del progetto:
+[`CHANGELOG.md`](CHANGELOG.md). Deploy containerizzato: [`DEPLOY.md`](DEPLOY.md). Relazione
+completa: [`docs/relazione-progetto.md`](docs/relazione-progetto.md).
 
 ## Principi
 
