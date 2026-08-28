@@ -108,7 +108,8 @@ Segue il contratto reale in [`API_CONTRACT.md`](API_CONTRACT.md).
 
 Contratto tra moduli: [`API_CONTRACT.md`](API_CONTRACT.md). Stato del progetto:
 [`CHANGELOG.md`](CHANGELOG.md). Deploy containerizzato: [`DEPLOY.md`](DEPLOY.md). Relazione
-completa: [`docs/relazione-progetto.md`](docs/relazione-progetto.md).
+completa: [`docs/relazione-progetto.md`](docs/relazione-progetto.md). Problemi noti e come sono
+stati risolti: [`docs/knowledge-base/`](docs/knowledge-base/).
 
 ## Principi
 
