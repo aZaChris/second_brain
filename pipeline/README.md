@@ -5,7 +5,8 @@ Trascrizione audio e captioning immagini per gli eventi audio/immagine già salv
 Interroga periodicamente `GET /api/events/pending` e invia il risultato con
 `PATCH /api/events/{event_id}`, secondo [`../API_CONTRACT.md`](../API_CONTRACT.md).
 
-Design e task: [`../specs/006-pipeline-transcription-captioning/`](../specs/006-pipeline-transcription-captioning/).
+Design e task: [`../specs/006-pipeline-transcription-captioning/`](../specs/006-pipeline-transcription-captioning/),
+STT/captioning locali: [`../specs/010-stt-captioning-locale/`](../specs/010-stt-captioning-locale/).
 
 ## Setup
 
@@ -16,14 +17,17 @@ pip install -r requirements-dev.txt
 
 export CORE_API_URL="http://localhost:8000"
 export CORE_API_TOKEN="<stesso token configurato su core, vedi ../DEPLOY.md>"
-export STT_API_URL="<endpoint del servizio esterno di trascrizione>"
-export STT_API_TOKEN="<token del servizio>"
-export CAPTIONING_API_URL="<endpoint del servizio esterno di captioning>"
-export CAPTIONING_API_TOKEN="<token del servizio>"
+# STT_MODE=local e CAPTIONING_MODE=local sono il default, scaricano qui i pesi
+export STT_MODEL_CACHE="./models/stt"
+export CAPTIONING_MODEL_CACHE="./models/captioning"
 export POLL_INTERVAL_SECONDS=30
 
 python -m src.worker
 ```
+
+Per usare un servizio esterno invece dei modelli locali, indipendentemente per audio o immagini:
+`STT_MODE=external` + `STT_API_URL`/`STT_API_TOKEN`, oppure `CAPTIONING_MODE=external` +
+`CAPTIONING_API_URL`/`CAPTIONING_API_TOKEN` (vedi `specs/010-stt-captioning-locale/`).
 
 > In alternativa a `venv`+`pip`: `uv venv` + `uv pip install -r requirements-dev.txt`
 > ([astral.sh/uv](https://astral.sh/uv)) — stessi file di requirements, ma condivide su disco i
